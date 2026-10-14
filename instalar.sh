@@ -12,17 +12,29 @@ PLUGIN_PATH="/usr/lib/enigma2/python/Plugins/Extensions/$PLUGIN_NAME"
 rm -rf $PLUGIN_PATH
 rm -rf /tmp/Calculadora.zip
 rm -rf /tmp/Calculadora-main
+rm -rf /tmp/Calculadora-master
 
 echo "> Descargando desde GitHub..."
 wget --no-check-certificate https://github.com/theking-cs/Calculadora/archive/refs/heads/main.zip -O /tmp/Calculadora.zip
 
+if [ ! -f /tmp/Calculadora.zip ]; then
+    echo "Error: No se pudo descargar el archivo."
+    exit 1
+fi
+
 echo "> Extrayendo archivos..."
-unzip -q /tmp/Calculadora.zip -d /tmp/
+python3 -c "import zipfile; zipfile.ZipFile('/tmp/Calculadora.zip', 'r').extractall('/tmp/')"
 
-echo "> Instalando en el sistema..."
-mv /tmp/Calculadora-main $PLUGIN_PATH
+# Detectar automáticamente si la carpeta extraída es main o master
+if [ -d /tmp/Calculadora-main ]; then
+    mv /tmp/Calculadora-main $PLUGIN_PATH
+elif [ -d /tmp/Calculadora-master ]; then
+    mv /tmp/Calculadora-master $PLUGIN_PATH
+else
+    echo "Error: No se encontró la carpeta extraída."
+    exit 1
+fi
 
-# Dar permisos
 echo "> Configurando permisos..."
 chmod -R 755 $PLUGIN_PATH
 
